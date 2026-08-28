@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase";
 import type { Ad } from "@/lib/types";
 
@@ -160,157 +160,118 @@ export default function Screenjack() {
     }
   };
 
-  const tickerItems = useMemo(
-    () => [
-      `🔥 Next Available Slot: ${currentAd ? formatCountdown(timeLeft) : "INSTANT"}`,
-      `👥 Active Viewers: ${viewers.toLocaleString()}`,
-      "⏱️ Standard Airtime: 60s",
-      "💰 Slot Price: $5.00",
-      "📡 Share of Voice: 100%",
-    ],
-    [currentAd, timeLeft, viewers],
-  );
-
-  const previewTitle = formData.title.trim() || "YOUR HEADLINE HERE";
-  const previewFg = contrastText(formData.banner_color);
   const liveFg = currentAd ? contrastText(currentAd.banner_color) : "#ffffff";
 
   return (
     <main
-      className="relative flex min-h-screen flex-col overflow-x-hidden text-white"
+      className="relative h-dvh min-h-screen overflow-hidden text-white transition-colors duration-700"
       style={{
-        backgroundColor: currentAd ? currentAd.banner_color : "#020403",
+        backgroundColor: currentAd ? currentAd.banner_color : "#050505",
       }}
     >
-      <div className="sticky top-0 z-40 overflow-hidden border-b border-lime-400/30 bg-black/90 py-2 backdrop-blur-md">
-        <div className="ticker-track flex w-max gap-10 whitespace-nowrap px-4 font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-lime-300 sm:text-xs">
-          {[0, 1].map((copy) => (
-            <div key={copy} className="flex gap-10">
-              {tickerItems.map((item, i) => (
-                <span key={`${copy}-${i}`}>{item}</span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      {!currentAd ? (
+        <>
+          <div className="tv-noise pointer-events-none absolute inset-0" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[length:40px_40px]" />
+          <div className="scanline pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(to_bottom,transparent_0,transparent_2px,rgba(0,0,0,0.28)_3px)] opacity-40" />
+        </>
+      ) : null}
 
-      <header className="relative z-30 flex flex-col items-center gap-3 px-4 py-5 text-center sm:py-6">
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <h1 className="text-4xl font-black tracking-[0.18em] text-white drop-shadow-[0_0_18px_rgba(255,255,255,0.35)] sm:text-6xl">
-            SCREENJACK
-          </h1>
-          <span className="inline-flex items-center gap-2 rounded-full border border-red-500/60 bg-red-600/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] text-red-300 sm:text-xs">
-            <span className="rec-dot h-2.5 w-2.5 rounded-full bg-red-500" />
-            LIVE BROADCAST
+      <header className="relative z-40 grid grid-cols-3 items-center gap-2 border-b border-white/10 bg-black/75 px-3 py-3 backdrop-blur-md sm:px-6">
+        <h1 className="justify-self-start text-lg font-black tracking-[0.18em] sm:text-2xl">
+          SCREENJACK
+        </h1>
+        <div className="justify-self-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-red-500/70 bg-red-600/20 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] text-red-300 sm:text-xs">
+            <span className="rec-dot h-2 w-2 rounded-full bg-red-500" />
+            🔴 LIVE BROADCAST
           </span>
         </div>
-        <p className="max-w-xl text-xs uppercase tracking-[0.28em] text-white/70 sm:text-sm">
-          Buy 100% internet share-of-voice for 60 seconds.
+        <p className="justify-self-end text-[10px] font-bold uppercase tracking-[0.12em] text-white/80 sm:text-sm">
+          👥 {viewers.toLocaleString()} watching
         </p>
-        {paid ? (
-          <p className="rounded border border-lime-400/40 bg-lime-400/10 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-lime-300">
-            PAYMENT CONFIRMED — YOUR SLOT IS IN THE QUEUE
-          </p>
-        ) : null}
       </header>
 
-      <section className="relative z-10 flex min-h-[52vh] flex-1 flex-col">
+      <p className="relative z-30 border-b border-white/10 bg-black/50 px-4 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-white/70 sm:text-xs">
+        Hijack the entire screen for 60 seconds.
+      </p>
+
+      {paid ? (
+        <p className="relative z-30 bg-lime-400/15 px-4 py-1.5 text-center text-[11px] font-semibold tracking-[0.16em] text-lime-300">
+          PAYMENT CONFIRMED — YOUR SLOT IS IN THE QUEUE
+        </p>
+      ) : null}
+
+      {currentAd ? (
+        <div
+          className="pointer-events-none absolute top-24 right-4 z-30 sm:top-28 sm:right-8"
+          style={{ color: liveFg }}
+        >
+          <p className="text-right text-[10px] font-bold uppercase tracking-[0.3em] opacity-70">
+            Airtime left
+          </p>
+          <p className="timer-blink text-6xl font-black tabular-nums leading-none tracking-tighter sm:text-8xl lg:text-9xl">
+            {formatCountdown(timeLeft)}
+          </p>
+        </div>
+      ) : null}
+
+      <section className="relative z-10 flex h-[calc(100dvh-7.5rem)] flex-col items-center justify-center px-4 pb-64 pt-6 sm:pb-72">
         {currentAd ? (
-          <div
-            className="relative flex flex-1 flex-col items-center justify-center px-4 py-10 text-center sm:px-10"
+          <h2
+            className="max-w-6xl break-words text-center text-6xl font-black leading-[0.9] tracking-tight sm:text-8xl lg:text-9xl"
             style={{ color: liveFg }}
           >
-            <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.45em] opacity-70">
-              Currently dominating the screen
+            {currentAd.title}
+          </h2>
+        ) : (
+          <div className="glitch-box max-w-3xl rounded-sm border-2 border-white/80 bg-black/75 px-6 py-10 text-center shadow-[0_0_50px_rgba(255,255,255,0.08)] backdrop-blur-sm">
+            <p className="mb-3 text-[10px] font-bold tracking-[0.4em] text-red-400">
+              🔴 BROADCAST LIVE
+            </p>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-5xl">
+              SIGNAL OFFLINE — NO ACTIVE BROADCAST
+            </h2>
+            <p className="mt-5 text-sm text-white/70 sm:text-base">
+              Be the first to take control. Next slot triggers instantly upon
+              payment.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 space-y-3 p-4 sm:p-6">
+        {currentAd ? (
+          <div className="pointer-events-auto mx-auto flex w-full max-w-3xl items-center justify-between gap-3 rounded-lg border border-white/20 bg-black/70 px-4 py-2.5 text-white backdrop-blur-md">
+            <p className="min-w-0 truncate text-xs opacity-80 sm:text-sm">
+              {currentAd.url}
             </p>
             <a
               href={currentAd.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="mb-8 max-w-5xl break-words text-5xl font-black leading-[0.92] tracking-tight hover:underline sm:text-7xl lg:text-8xl xl:text-9xl"
+              className="shrink-0 rounded bg-white px-3 py-1.5 text-[11px] font-black tracking-[0.12em] text-black"
             >
-              {currentAd.title}
+              VISIT SITE
             </a>
-            <div className="timer-blink text-6xl font-black tabular-nums tracking-tighter sm:text-8xl lg:text-[9rem]">
-              {formatCountdown(timeLeft)} remaining
-            </div>
           </div>
-        ) : (
-          <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden px-4 py-8">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(50,255,120,0.12),transparent_58%)]" />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(50,255,120,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(50,255,120,0.05)_1px,transparent_1px)] bg-[length:48px_48px]" />
-            <div className="radar-sweep pointer-events-none absolute left-1/2 top-1/2 h-[min(120vw,900px)] w-[min(120vw,900px)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_0deg,transparent_0deg,transparent_300deg,rgba(50,255,140,0.0)_320deg,rgba(50,255,140,0.45)_360deg)] opacity-70" />
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,520px)] w-[min(70vw,520px)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-lime-400/20" />
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[min(48vw,340px)] w-[min(48vw,340px)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-lime-400/15" />
-            <div className="scanline pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-lime-400/10 to-transparent" />
+        ) : null}
 
-            <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-8 lg:flex-row lg:items-stretch lg:justify-center">
-              <div
-                className="glitch-box w-full max-w-xl rounded-sm border-2 border-lime-400/80 bg-black/70 px-6 py-8 text-center shadow-[0_0_40px_rgba(200,255,0,0.15)] backdrop-blur-sm"
-                data-text="BROADCAST OFFLINE — NO ACTIVE AD"
-              >
-                <p className="mb-3 text-[10px] font-bold tracking-[0.4em] text-lime-400/80">
-                  STUDIO MONITOR // SIGNAL LOST
-                </p>
-                <h2 className="text-2xl font-black tracking-tight text-lime-300 sm:text-4xl">
-                  BROADCAST OFFLINE — NO ACTIVE AD
-                </h2>
-                <p className="mt-4 text-xs uppercase tracking-[0.28em] text-white/50">
-                  The screen is yours. 60 seconds. $5.
-                </p>
-              </div>
-
-              <div className="w-full max-w-sm rounded-xl border border-white/10 bg-black/55 p-4 shadow-[0_0_40px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-white/50">
-                  Live preview of your hijack
-                </p>
-                <div
-                  className="flex min-h-40 flex-col items-center justify-center rounded-lg px-4 py-6 text-center"
-                  style={{
-                    backgroundColor: formData.banner_color,
-                    color: previewFg,
-                  }}
-                >
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] opacity-70">
-                    Your transmission
-                  </p>
-                  <p className="mb-4 break-words text-2xl font-black leading-tight">
-                    {previewTitle}
-                  </p>
-                  <p className="timer-blink text-xl font-black tabular-nums">
-                    00:60 remaining
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </section>
-
-      <section className="relative z-30 mx-auto w-full max-w-md px-4 pb-10 pt-2">
         <form
           onSubmit={handleCheckout}
-          className="space-y-4 rounded-2xl border border-white/15 bg-black/55 p-6 shadow-[0_0_80px_rgba(200,255,0,0.08)] backdrop-blur-xl"
+          className="pointer-events-auto mx-auto w-full max-w-md space-y-3 rounded-2xl border border-white/15 bg-black/60 p-5 shadow-[0_12px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl"
         >
-          <div className="text-center">
-            <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-lime-400/80">
-              Acquisition terminal
-            </p>
-            <h2 className="mt-1 text-lg font-black tracking-wide">
-              Hijack the broadcast
-            </h2>
-          </div>
-
           <label className="block space-y-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-              Headline
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
+              Headline / Pitch
             </span>
             <input
               type="text"
               placeholder="OWN THE INTERNET"
               required
               value={formData.title}
-              className="w-full rounded-lg border border-white/15 bg-black/70 p-3 text-white outline-none ring-lime-400/0 transition focus:border-lime-400 focus:ring-2 focus:ring-lime-400/40"
+              className="w-full rounded-lg border border-white/15 bg-black/70 p-3 text-white outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-400/40"
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
@@ -318,8 +279,8 @@ export default function Screenjack() {
           </label>
 
           <label className="block space-y-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-              Destination URL
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
+              Target Link (URL)
             </span>
             <input
               type="url"
@@ -334,8 +295,8 @@ export default function Screenjack() {
           </label>
 
           <div className="space-y-2">
-            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
-              Broadcast color
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
+              Banner Color
             </span>
             <div className="flex items-center gap-2">
               {COLOR_SWATCHES.map((color) => (
@@ -357,7 +318,7 @@ export default function Screenjack() {
               <input
                 type="color"
                 value={formData.banner_color}
-                aria-label="Custom broadcast color"
+                aria-label="Custom banner color"
                 className="h-8 w-12 cursor-pointer rounded border border-white/20 bg-transparent"
                 onChange={(e) =>
                   setFormData({ ...formData, banner_color: e.target.value })
@@ -373,12 +334,12 @@ export default function Screenjack() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-lime-400 py-4 text-sm font-black uppercase tracking-[0.12em] text-black transition hover:bg-yellow-300 disabled:opacity-60 sm:text-base"
+            className="w-full rounded-lg bg-lime-400 py-4 text-sm font-black uppercase tracking-[0.08em] text-black transition hover:bg-yellow-300 disabled:opacity-60"
           >
-            {loading ? "Locking slot..." : "HIJACK THE SCREEN NOW — $5"}
+            {loading ? "Locking slot..." : "HIJACK THE SCREEN NOW ($5)"}
           </button>
         </form>
-      </section>
+      </div>
     </main>
   );
 }

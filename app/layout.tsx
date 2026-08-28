@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SCREENJACK",
-  description: "Buy 100% internet share-of-voice for 60 seconds.",
+  description: "Hijack the entire screen for 60 seconds.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

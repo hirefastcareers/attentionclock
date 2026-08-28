@@ -111,3 +111,40 @@ body {
 .scanline {
   animation: scan-move 5.5s linear infinite;
 }
+
+@keyframes noise-flicker {
+  0% {
+    opacity: 0.1;
+    transform: translate(0, 0);
+  }
+  25% {
+    opacity: 0.18;
+    transform: translate(-1%, 2%);
+  }
+  50% {
+    opacity: 0.12;
+    transform: translate(2%, -1%);
+  }
+  75% {
+    opacity: 0.2;
+    transform: translate(-2%, -2%);
+  }
+  100% {
+    opacity: 0.14;
+    transform: translate(1%, 1%);
+  }
+}
+
+.tv-noise {
+  background-image:
+    repeating-radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.09) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.05) 0,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  background-size: 4px 4px, 100% 4px;
+  animation: noise-flicker 0.18s steps(2) infinite;
+}
