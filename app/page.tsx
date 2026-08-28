@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase";
+import { trackVemetrics } from "@/lib/vemetrics";
 import type { Ad } from "@/lib/types";
 
 const COLOR_SWATCHES = [
@@ -98,7 +99,7 @@ export default function Screenjack() {
 
     if (ad && lastTrackedId.current !== ad.id) {
       lastTrackedId.current = ad.id;
-      window.vemetrics?.track("Ad View", { ad_id: ad.id, title: ad.title });
+      trackVemetrics("Ad View", { ad_id: ad.id, title: ad.title });
     }
 
     if (!ad) {
@@ -171,6 +172,10 @@ export default function Screenjack() {
 
       const data = await res.json();
       if (data.url) {
+        trackVemetrics("Checkout Initiated", {
+          headline: formData.title,
+          duration,
+        });
         window.location.href = data.url;
         return;
       }
