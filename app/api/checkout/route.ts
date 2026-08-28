@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import DodoPayments from "dodopayments";
 
+const ALLOWED_DURATIONS = new Set([1, 2, 5, 10]);
+
 const dodo = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
   environment:
@@ -9,9 +11,14 @@ const dodo = new DodoPayments({
       : "live_mode",
 });
 
+function parseDuration(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value);
+  return ALLOWED_DURATIONS.has(n) ? n : 1;
+}
+
 export async function POST(req: Request) {
   try {
-    const { title, url, banner_color } = await req.json();
+    const { title, url, banner_color, duration = 1 } = await req.json();
 
     if (
       typeof title !== "string" ||
@@ -24,14 +31,21 @@ export async function POST(req: Request) {
       );
     }
 
+    const durationMinutes = parseDuration(duration);
+
     const response = await dodo.checkoutSessions.create({
       product_cart: [
         {
           product_id: process.env.NEXT_PUBLIC_DODO_PRODUCT_ID!,
-          quantity: 1,
+          quantity: durationMinutes,
         },
       ],
-      metadata: { title, url, banner_color },
+      metadata: {
+        title,
+        url,
+        banner_color,
+        duration_seconds: String(durationMinutes * 60),
+      },
       return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/?success=true`,
     });
 

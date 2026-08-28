@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { Webhook } from "standardwebhooks";
 import { createAdminSupabase } from "@/lib/supabase";
 
-const AD_DURATION_SECONDS = 60;
+const DEFAULT_DURATION_SECONDS = 60;
+const ALLOWED_DURATION_SECONDS = new Set([60, 120, 300, 600]);
 
 type PaymentSucceededEvent = {
   type: string;
@@ -12,9 +13,18 @@ type PaymentSucceededEvent = {
       title?: string;
       url?: string;
       banner_color?: string;
+      duration_seconds?: string;
     };
   };
 };
+
+function parseDurationSeconds(value: unknown): number {
+  const n =
+    typeof value === "string" || typeof value === "number"
+      ? Number.parseInt(String(value), 10)
+      : Number.NaN;
+  return ALLOWED_DURATION_SECONDS.has(n) ? n : DEFAULT_DURATION_SECONDS;
+}
 
 export async function POST(req: Request) {
   const webhookKey = process.env.DODO_PAYMENTS_WEBHOOK_KEY;
@@ -43,8 +53,10 @@ export async function POST(req: Request) {
   const body = JSON.parse(rawBody) as PaymentSucceededEvent;
 
   if (body.type === "payment.succeeded") {
-    const { title, url, banner_color } = body.data?.metadata ?? {};
+    const { title, url, banner_color, duration_seconds } =
+      body.data?.metadata ?? {};
     const paymentId = body.data?.payment_id;
+    const durationInSec = parseDurationSeconds(duration_seconds);
 
     if (
       typeof title !== "string" ||
@@ -70,12 +82,13 @@ export async function POST(req: Request) {
       startsAt = new Date(latestAd.ends_at);
     }
 
-    const endsAt = new Date(startsAt.getTime() + AD_DURATION_SECONDS * 1000);
+    const endsAt = new Date(startsAt.getTime() + durationInSec * 1000);
 
     const { error } = await supabase.from("ads").insert({
       title,
       url,
       banner_color,
+      duration_seconds: durationInSec,
       starts_at: startsAt.toISOString(),
       ends_at: endsAt.toISOString(),
       status: startsAt <= now ? "active" : "pending",

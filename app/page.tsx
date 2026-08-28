@@ -13,6 +13,15 @@ const COLOR_SWATCHES = [
   "#ffffff",
 ];
 
+const DURATION_OPTIONS = [
+  { minutes: 1, price: 5 },
+  { minutes: 2, price: 10 },
+  { minutes: 5, price: 25 },
+  { minutes: 10, price: 50 },
+] as const;
+
+const UNIT_PRICE_USD = 5;
+
 function formatCountdown(seconds: number) {
   const clamped = Math.max(0, seconds);
   const m = Math.floor(clamped / 60);
@@ -38,6 +47,7 @@ export default function Screenjack() {
     url: "",
     banner_color: "#ff0033",
   });
+  const [duration, setDuration] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewers, setViewers] = useState(1420);
@@ -143,7 +153,7 @@ export default function Screenjack() {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, duration }),
       });
 
       const data = await res.json();
@@ -194,7 +204,7 @@ export default function Screenjack() {
       </header>
 
       <p className="relative z-30 border-b border-white/10 bg-black/50 px-4 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-white/70 sm:text-xs">
-        Hijack the entire screen for 60 seconds.
+        Hijack the entire screen. Stack more time.
       </p>
 
       {paid ? (
@@ -217,7 +227,7 @@ export default function Screenjack() {
         </div>
       ) : null}
 
-      <section className="relative z-10 flex h-[calc(100dvh-7.5rem)] flex-col items-center justify-center px-4 pb-64 pt-6 sm:pb-72">
+      <section className="relative z-10 flex h-[calc(100dvh-7.5rem)] flex-col items-center justify-center px-4 pb-72 pt-6 sm:pb-80">
         {currentAd ? (
           <h2
             className="max-w-6xl break-words text-center text-6xl font-black leading-[0.9] tracking-tight sm:text-8xl lg:text-9xl"
@@ -294,6 +304,23 @@ export default function Screenjack() {
             />
           </label>
 
+          <label className="block space-y-1.5">
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
+              Duration
+            </span>
+            <select
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              className="w-full rounded-lg border border-white/15 bg-black/70 p-3 text-white outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-400/40"
+            >
+              {DURATION_OPTIONS.map((option) => (
+                <option key={option.minutes} value={option.minutes}>
+                  {`${option.minutes} Minute${option.minutes === 1 ? "" : "s"} ($${option.price})`}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <div className="space-y-2">
             <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
               Banner Color
@@ -336,7 +363,9 @@ export default function Screenjack() {
             disabled={loading}
             className="w-full rounded-lg bg-lime-400 py-4 text-sm font-black uppercase tracking-[0.08em] text-black transition hover:bg-yellow-300 disabled:opacity-60"
           >
-            {loading ? "Locking slot..." : "HIJACK THE SCREEN NOW ($5)"}
+            {loading
+              ? "Locking slot..."
+              : `HIJACK THE SCREEN NOW ($${duration * UNIT_PRICE_USD})`}
           </button>
         </form>
       </div>
