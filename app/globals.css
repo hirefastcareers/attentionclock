@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
+  --background: #020403;
   --foreground: #ededed;
 }
 
@@ -16,4 +16,98 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@keyframes radar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes marquee-ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes rec-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.65);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes timer-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  95% {
+    opacity: 0.22;
+  }
+}
+
+@keyframes glitch-shift {
+  0%,
+  90%,
+  100% {
+    transform: translate(0);
+  }
+  92% {
+    transform: translate(-3px, 1px);
+  }
+  94% {
+    transform: translate(3px, -1px);
+  }
+  96% {
+    transform: translate(-2px, -2px);
+  }
+  98% {
+    transform: translate(2px, 1px);
+  }
+}
+
+@keyframes scan-move {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.ticker-track {
+  animation: marquee-ticker 28s linear infinite;
+}
+
+.radar-sweep {
+  animation: radar-spin 4.5s linear infinite;
+}
+
+.rec-dot {
+  animation: rec-pulse 1.4s ease-out infinite;
+}
+
+.timer-blink {
+  animation: timer-blink 1s step-end infinite;
+}
+
+.glitch-box {
+  animation: glitch-shift 3s steps(2, end) infinite;
+}
+
+.scanline {
+  animation: scan-move 5.5s linear infinite;
 }

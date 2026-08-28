@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Attention Clock",
-  description: "Buy 60 seconds of undivided screen time.",
+  title: "SCREENJACK",
+  description: "Buy 100% internet share-of-voice for 60 seconds.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
