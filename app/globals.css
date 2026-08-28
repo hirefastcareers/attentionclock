@@ -153,6 +153,23 @@ body {
   box-shadow: 0 0 36px color-mix(in srgb, var(--accent, #a3e635) 75%, transparent);
 }
 
+@keyframes viewer-join {
+  0% {
+    color: #c8ff00;
+    text-shadow: 0 0 14px rgba(163, 230, 53, 0.95);
+    transform: scale(1.08);
+  }
+  100% {
+    color: rgb(255 255 255 / 0.8);
+    text-shadow: none;
+    transform: scale(1);
+  }
+}
+
+.viewer-pulse {
+  animation: viewer-join 0.9s ease-out;
+}
+
 .scanline {
   animation: scan-move 5.5s linear infinite;
 }

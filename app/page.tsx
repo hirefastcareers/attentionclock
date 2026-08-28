@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase";
+import { useLiveViewers } from "@/lib/live-viewers";
 import { trackVemetrics } from "@/lib/vemetrics";
 import type { Ad } from "@/lib/types";
 
@@ -64,10 +65,10 @@ export default function Screenjack() {
   const [duration, setDuration] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [viewers, setViewers] = useState(1420);
   const [paid, setPaid] = useState(false);
   const lastTrackedId = useRef<string | null>(null);
   const supabaseRef = useRef(createBrowserSupabase());
+  const { viewerCount, justJoined } = useLiveViewers(supabaseRef.current);
 
   const fetchActiveAd = useCallback(async () => {
     const supabase = supabaseRef.current;
@@ -145,15 +146,6 @@ export default function Screenjack() {
   }, [currentAd, fetchActiveAd]);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setViewers((v) =>
-        Math.max(980, Math.min(2480, v + Math.floor(Math.random() * 21) - 10)),
-      );
-    }, 1600);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "true") setPaid(true);
   }, []);
@@ -209,22 +201,30 @@ export default function Screenjack() {
         </>
       ) : null}
 
-      <header className="relative z-40 grid shrink-0 grid-cols-3 items-center gap-2 border-b border-white/10 bg-black/75 px-3 py-1.5 backdrop-blur-md sm:px-6 sm:py-2">
-        <h1 className="justify-self-start text-lg font-black tracking-[0.18em] sm:text-2xl">
+      <header className="relative z-40 flex w-full shrink-0 items-center justify-between gap-2 border-b border-white/10 bg-black/75 px-4 py-3 backdrop-blur-md">
+        <h1 className="shrink-0 whitespace-nowrap text-base font-black tracking-[0.18em] sm:text-xl">
           SCREENJACK
         </h1>
-        <div className="justify-self-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-red-500/70 bg-red-600/20 px-2.5 py-1 text-[10px] font-bold tracking-[0.16em] text-red-300 sm:text-xs">
-            <span className="rec-dot h-2 w-2 rounded-full bg-red-500" />
-            🔴 LIVE BROADCAST
+        <div className="flex min-w-0 items-center justify-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/70 bg-red-600/20 px-2 py-1 text-[10px] font-bold tracking-[0.16em] text-red-300 sm:gap-2 sm:px-2.5 sm:text-xs">
+            <span className="rec-dot h-2 w-2 shrink-0 rounded-full bg-red-500" />
+            <span className="sm:hidden">LIVE</span>
+            <span className="hidden whitespace-nowrap sm:inline">
+              🔴 LIVE BROADCAST
+            </span>
           </span>
         </div>
-        <p className="justify-self-end text-[10px] font-bold uppercase tracking-[0.12em] text-white/80 sm:text-sm">
-          👥 {viewers.toLocaleString()} watching
+        <p
+          className={`shrink-0 whitespace-nowrap text-xs font-bold uppercase tracking-[0.12em] text-white/80 sm:text-sm ${
+            justJoined ? "viewer-pulse" : ""
+          }`}
+        >
+          👥 {viewerCount.toLocaleString()}
+          <span className="hidden sm:inline"> WATCHING</span>
         </p>
       </header>
 
-      <p className="relative z-30 shrink-0 border-b border-white/10 bg-black/50 px-4 py-1 text-center text-[10px] uppercase tracking-[0.22em] text-white/70 sm:text-xs">
+      <p className="relative z-30 hidden shrink-0 border-b border-white/10 bg-black/50 px-4 py-1 text-center text-[10px] uppercase tracking-[0.22em] text-white/70 sm:block sm:text-xs">
         Hijack the entire screen. Stack more time.
       </p>
 
