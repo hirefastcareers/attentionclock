@@ -29,14 +29,27 @@ function formatCountdown(seconds: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function contrastText(hex: string) {
+function parseHex(hex: string) {
   const raw = hex.replace("#", "");
-  if (raw.length < 6) return "#ffffff";
+  if (raw.length < 6) return null;
   const r = Number.parseInt(raw.slice(0, 2), 16);
   const g = Number.parseInt(raw.slice(2, 4), 16);
   const b = Number.parseInt(raw.slice(4, 6), 16);
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  if ([r, g, b].some(Number.isNaN)) return null;
+  return { r, g, b };
+}
+
+function contrastText(hex: string) {
+  const rgb = parseHex(hex);
+  if (!rgb) return "#ffffff";
+  const yiq = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
   return yiq >= 150 ? "#050505" : "#ffffff";
+}
+
+function hexToRgba(hex: string, alpha: number) {
+  const rgb = parseHex(hex);
+  if (!rgb) return `rgba(163, 230, 53, ${alpha})`;
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
 }
 
 export default function Screenjack() {
@@ -171,12 +184,15 @@ export default function Screenjack() {
   };
 
   const liveFg = currentAd ? contrastText(currentAd.banner_color) : "#ffffff";
+  const previewTitle = formData.title.trim();
+  const accent = formData.banner_color;
 
   return (
     <main
-      className="relative h-dvh min-h-screen overflow-hidden text-white transition-colors duration-700"
+      className="relative flex h-dvh min-h-0 flex-col overflow-hidden text-white transition-colors duration-700"
       style={{
         backgroundColor: currentAd ? currentAd.banner_color : "#050505",
+        ["--accent" as string]: accent,
       }}
     >
       {!currentAd ? (
@@ -188,7 +204,7 @@ export default function Screenjack() {
         </>
       ) : null}
 
-      <header className="relative z-40 grid grid-cols-3 items-center gap-2 border-b border-white/10 bg-black/75 px-3 py-3 backdrop-blur-md sm:px-6">
+      <header className="relative z-40 grid shrink-0 grid-cols-3 items-center gap-2 border-b border-white/10 bg-black/75 px-3 py-1.5 backdrop-blur-md sm:px-6 sm:py-2">
         <h1 className="justify-self-start text-lg font-black tracking-[0.18em] sm:text-2xl">
           SCREENJACK
         </h1>
@@ -203,57 +219,73 @@ export default function Screenjack() {
         </p>
       </header>
 
-      <p className="relative z-30 border-b border-white/10 bg-black/50 px-4 py-2 text-center text-[10px] uppercase tracking-[0.22em] text-white/70 sm:text-xs">
+      <p className="relative z-30 shrink-0 border-b border-white/10 bg-black/50 px-4 py-1 text-center text-[10px] uppercase tracking-[0.22em] text-white/70 sm:text-xs">
         Hijack the entire screen. Stack more time.
       </p>
 
       {paid ? (
-        <p className="relative z-30 bg-lime-400/15 px-4 py-1.5 text-center text-[11px] font-semibold tracking-[0.16em] text-lime-300">
+        <p className="relative z-30 shrink-0 bg-lime-400/15 px-4 py-1 text-center text-[11px] font-semibold tracking-[0.16em] text-lime-300">
           PAYMENT CONFIRMED — YOUR SLOT IS IN THE QUEUE
         </p>
       ) : null}
 
       {currentAd ? (
         <div
-          className="pointer-events-none absolute top-24 right-4 z-30 sm:top-28 sm:right-8"
+          className="pointer-events-none absolute top-16 right-4 z-30 sm:top-20 sm:right-8"
           style={{ color: liveFg }}
         >
           <p className="text-right text-[10px] font-bold uppercase tracking-[0.3em] opacity-70">
             Airtime left
           </p>
-          <p className="timer-blink text-6xl font-black tabular-nums leading-none tracking-tighter sm:text-8xl lg:text-9xl">
+          <p className="timer-blink text-5xl font-black tabular-nums leading-none tracking-tighter sm:text-7xl lg:text-8xl">
             {formatCountdown(timeLeft)}
           </p>
         </div>
       ) : null}
 
-      <section className="relative z-10 flex h-[calc(100dvh-7.5rem)] flex-col items-center justify-center px-4 pb-72 pt-6 sm:pb-80">
+      <section className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-2 sm:py-3">
         {currentAd ? (
           <h2
-            className="max-w-6xl break-words text-center text-6xl font-black leading-[0.9] tracking-tight sm:text-8xl lg:text-9xl"
+            className="max-w-6xl break-words text-center text-5xl font-black leading-[0.9] tracking-tight sm:text-7xl lg:text-8xl"
             style={{ color: liveFg }}
           >
             {currentAd.title}
           </h2>
         ) : (
-          <div className="glitch-box max-w-3xl rounded-sm border-2 border-white/80 bg-black/75 px-6 py-10 text-center shadow-[0_0_50px_rgba(255,255,255,0.08)] backdrop-blur-sm">
-            <p className="mb-3 text-[10px] font-bold tracking-[0.4em] text-red-400">
-              🔴 BROADCAST LIVE
+          <div
+            className="preview-card w-full max-w-md rounded-sm border-2 bg-black/75 px-4 py-6 text-center backdrop-blur-sm sm:max-w-2xl sm:px-6 sm:py-8"
+            style={{
+              borderColor: accent,
+              ["--preview-glow" as string]: hexToRgba(accent, 0.5),
+            }}
+          >
+            <p
+              className="mb-2 text-[10px] font-bold tracking-[0.4em] sm:mb-3"
+              style={{ color: previewTitle ? accent : "#f87171" }}
+            >
+              {previewTitle ? "LIVE PREVIEW" : "🔴 BROADCAST LIVE"}
             </p>
-            <h2 className="text-3xl font-black tracking-tight text-white sm:text-5xl">
-              SIGNAL OFFLINE — NO ACTIVE BROADCAST
+            <h2
+              className="break-words text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl"
+              style={{
+                color: accent,
+                textShadow: `0 0 24px ${hexToRgba(accent, 0.55)}`,
+              }}
+            >
+              {previewTitle || "SIGNAL OFFLINE — NO ACTIVE BROADCAST"}
             </h2>
-            <p className="mt-5 text-sm text-white/70 sm:text-base">
-              Be the first to take control. Next slot triggers instantly upon
-              payment.
+            <p className="mt-3 text-sm text-white/70 sm:mt-4 sm:text-base">
+              {previewTitle
+                ? "This is how your hijack will look on air."
+                : "Be the first to take control. Next slot triggers instantly upon payment."}
             </p>
           </div>
         )}
       </section>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 space-y-3 p-4 sm:p-6">
+      <div className="relative z-50 w-full shrink-0 space-y-2 px-4 pb-3 sm:pb-4">
         {currentAd ? (
-          <div className="pointer-events-auto mx-auto flex w-full max-w-3xl items-center justify-between gap-3 rounded-lg border border-white/20 bg-black/70 px-4 py-2.5 text-white backdrop-blur-md">
+          <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 rounded-lg border border-white/20 bg-black/70 px-4 py-2 text-white backdrop-blur-md">
             <p className="min-w-0 truncate text-xs opacity-80 sm:text-sm">
               {currentAd.url}
             </p>
@@ -270,9 +302,13 @@ export default function Screenjack() {
 
         <form
           onSubmit={handleCheckout}
-          className="pointer-events-auto mx-auto w-full max-w-md space-y-3 rounded-2xl border border-white/15 bg-black/60 p-5 shadow-[0_12px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className="mx-auto w-full max-w-md space-y-2 rounded-2xl border bg-black/60 p-3.5 shadow-[0_12px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-4"
+          style={{
+            borderColor: hexToRgba(accent, 0.35),
+            ["--accent" as string]: accent,
+          }}
         >
-          <label className="block space-y-1.5">
+          <label className="block space-y-1">
             <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
               Headline / Pitch
             </span>
@@ -281,14 +317,14 @@ export default function Screenjack() {
               placeholder="OWN THE INTERNET"
               required
               value={formData.title}
-              className="w-full rounded-lg border border-white/15 bg-black/70 p-3 text-white outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-400/40"
+              className="accent-field w-full rounded-lg border bg-black/70 px-3 py-2 text-white outline-none"
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
             />
           </label>
 
-          <label className="block space-y-1.5">
+          <label className="block space-y-1">
             <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
               Target Link (URL)
             </span>
@@ -297,21 +333,21 @@ export default function Screenjack() {
               placeholder="https://yoursite.com"
               required
               value={formData.url}
-              className="w-full rounded-lg border border-white/15 bg-black/70 p-3 text-white outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-400/40"
+              className="accent-field w-full rounded-lg border bg-black/70 px-3 py-2 text-white outline-none"
               onChange={(e) =>
                 setFormData({ ...formData, url: e.target.value })
               }
             />
           </label>
 
-          <label className="block space-y-1.5">
+          <label className="block space-y-1">
             <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
               Duration
             </span>
             <select
               value={duration}
               onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full rounded-lg border border-white/15 bg-black/70 p-3 text-white outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-400/40"
+              className="accent-field w-full rounded-lg border bg-black/70 px-3 py-2 text-white outline-none"
             >
               {DURATION_OPTIONS.map((option) => (
                 <option key={option.minutes} value={option.minutes}>
@@ -321,7 +357,7 @@ export default function Screenjack() {
             </select>
           </label>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
               Banner Color
             </span>
@@ -331,7 +367,7 @@ export default function Screenjack() {
                   key={color}
                   type="button"
                   aria-label={`Use color ${color}`}
-                  className={`h-8 w-8 rounded-full border-2 transition ${
+                  className={`h-7 w-7 rounded-full border-2 transition sm:h-8 sm:w-8 ${
                     formData.banner_color.toLowerCase() === color
                       ? "scale-110 border-white"
                       : "border-white/20 hover:scale-105"
@@ -346,7 +382,7 @@ export default function Screenjack() {
                 type="color"
                 value={formData.banner_color}
                 aria-label="Custom banner color"
-                className="h-8 w-12 cursor-pointer rounded border border-white/20 bg-transparent"
+                className="h-7 w-11 cursor-pointer rounded border border-white/20 bg-transparent sm:h-8 sm:w-12"
                 onChange={(e) =>
                   setFormData({ ...formData, banner_color: e.target.value })
                 }
@@ -361,7 +397,7 @@ export default function Screenjack() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-lime-400 py-4 text-sm font-black uppercase tracking-[0.08em] text-black transition hover:bg-yellow-300 disabled:opacity-60"
+            className="hijack-btn w-full rounded-lg bg-lime-400 py-3 text-sm font-black uppercase tracking-[0.08em] text-black hover:brightness-110 disabled:opacity-60"
           >
             {loading
               ? "Locking slot..."

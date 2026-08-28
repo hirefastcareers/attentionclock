@@ -108,6 +108,51 @@ body {
   animation: glitch-shift 3s steps(2, end) infinite;
 }
 
+@keyframes preview-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(163, 230, 53, 0.15),
+      0 0 18px var(--preview-glow, rgba(163, 230, 53, 0.15));
+  }
+  50% {
+    box-shadow:
+      0 0 32px rgba(163, 230, 53, 0.28),
+      0 0 40px var(--preview-glow, rgba(163, 230, 53, 0.35));
+  }
+}
+
+.preview-card {
+  animation:
+    glitch-shift 3s steps(2, end) infinite,
+    preview-pulse 2.6s ease-in-out infinite;
+}
+
+.accent-field {
+  border-color: color-mix(in srgb, var(--accent, #a3e635) 55%, rgb(255 255 255 / 0.12));
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.accent-field:focus {
+  border-color: var(--accent, #a3e635);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #a3e635) 40%, transparent);
+}
+
+.hijack-btn {
+  box-shadow: 0 0 22px color-mix(in srgb, var(--accent, #a3e635) 55%, transparent);
+  transition:
+    box-shadow 200ms ease,
+    filter 200ms ease,
+    opacity 200ms ease;
+}
+
+.hijack-btn:hover:not(:disabled) {
+  box-shadow: 0 0 36px color-mix(in srgb, var(--accent, #a3e635) 75%, transparent);
+}
+
 .scanline {
   animation: scan-move 5.5s linear infinite;
 }
