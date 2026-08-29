@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import DodoPayments from "dodopayments";
+import { SITE_URL } from "@/lib/site";
 
 const ALLOWED_DURATIONS = new Set([1, 2, 5, 10]);
 
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
         banner_color,
         duration_seconds: String(durationMinutes * 60),
       },
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/?success=true`,
+      return_url: `${SITE_URL}/?success=true`,
     });
 
     return NextResponse.json({ url: response.checkout_url });
