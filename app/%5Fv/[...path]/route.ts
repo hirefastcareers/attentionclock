@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 const HUB = "https://hub.vemetric.com";
 
-const FORWARD_REQUEST_HEADERS = [
-  "token",
-  "allow-cookies",
-  "v-host",
-  "v-sdk",
-  "v-sdk-version",
-  "content-type",
-  "v-referrer",
-] as const;
+const FORWARD_REQUEST_HEADERS: Record<string, string> = {
+  token: "Token",
+  "allow-cookies": "Allow-Cookies",
+  "v-host": "V-Host",
+  "v-sdk": "V-SDK",
+  "v-sdk-version": "V-SDK-Version",
+  "content-type": "Content-Type",
+  "v-referrer": "v-referrer",
+};
 
 function buildTargetUrl(path: string[], request: NextRequest) {
   const suffix = path.join("/");
@@ -24,9 +24,9 @@ function buildTargetUrl(path: string[], request: NextRequest) {
 function forwardHeaders(request: NextRequest) {
   const headers = new Headers();
 
-  for (const name of FORWARD_REQUEST_HEADERS) {
-    const value = request.headers.get(name);
-    if (value) headers.set(name, value);
+  for (const [incoming, outgoing] of Object.entries(FORWARD_REQUEST_HEADERS)) {
+    const value = request.headers.get(incoming);
+    if (value) headers.set(outgoing, value);
   }
 
   return headers;

@@ -1,16 +1,11 @@
 import { vemetric } from "@vemetric/web";
+import { VEMETRIC_TOKEN } from "@/lib/vemetric-config";
 
 export function trackVemetrics(
   event: string,
   props?: Record<string, unknown>,
 ) {
-  if (typeof window === "undefined") return;
-
-  const token = (
-    process.env.NEXT_PUBLIC_VEMETRIC_TOKEN ||
-    process.env.NEXT_PUBLIC_VEMETRICS_PROJECT_ID
-  )?.trim();
-  if (!token) return;
+  if (typeof window === "undefined" || !VEMETRIC_TOKEN) return;
 
   try {
     const tracked = vemetric.trackEvent(
