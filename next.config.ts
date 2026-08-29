@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
       {
-        source: "/_v/:slug",
+        source: "/_v/:slug*",
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       },
     ];
@@ -18,10 +18,6 @@ const nextConfig: NextConfig = {
       {
         source: "/_v_script.js",
         destination: "https://cdn.vemetric.com/main.js",
-      },
-      {
-        source: "/_v/:slug*",
-        destination: "https://hub.vemetric.com/:slug*",
       },
     ];
   },

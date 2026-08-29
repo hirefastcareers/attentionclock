@@ -6,9 +6,10 @@ export function trackVemetrics(
 ) {
   if (typeof window === "undefined") return;
 
-  const token =
-    process.env.NEXT_PUBLIC_VEMETRICS_PROJECT_ID ||
-    process.env.NEXT_PUBLIC_VEMETRIC_TOKEN;
+  const token = (
+    process.env.NEXT_PUBLIC_VEMETRIC_TOKEN ||
+    process.env.NEXT_PUBLIC_VEMETRICS_PROJECT_ID
+  )?.trim();
   if (!token) return;
 
   try {
