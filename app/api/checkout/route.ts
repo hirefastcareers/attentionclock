@@ -1,3 +1,4 @@
+import { getSiteUrl } from "@/lib/site-url";
 import { NextResponse } from "next/server";
 import DodoPayments from "dodopayments";
 
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
         banner_color,
         duration_seconds: String(durationMinutes * 60),
       },
-      return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/?success=true`,
+      return_url: `${getSiteUrl()}/?success=true`,
     });
 
     return NextResponse.json({ url: response.checkout_url });

@@ -9,5 +9,7 @@ if (token) {
     token,
     scriptUrl: "/_v_script.js",
     host: "/_v",
+    trackPageViews: true,
+    trackOutboundLinks: true,
   });
 }
